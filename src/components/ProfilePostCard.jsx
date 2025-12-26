@@ -1,35 +1,52 @@
-import {Button, Col, Image, Row} from 'react-bootstrap'
+import { useEffect, useState } from "react";
+import { Button, Col, Image, Row } from "react-bootstrap";
 
-export default function ProfilePostCard(){
-    const pic = 'https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg'
+export default function ProfilePostCard({ content, postId }) {
+  const [likes, setLikes] = useState(0);
+  const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
-    return(
-        <Row
-        className='p-3'
-        style={{borderTop: '1px solid #D3D3D3', borderBottom:'1px solid #D3D3D3'}}>
-            <Col sm={1}><Image src={pic} fluid roundedCirce /></Col>
-            <Col>
-            <strong>Haris</strong>
-            <span>@haris.samingan · Apr 16</span>
-            <p>Heyyyyy</p>
-            <div className='d-flex justify-content-between'>
-                <Button variant='light'>
-                    <i className='bi bi-chat'></i>
-                </Button>
-                <Button variant='light'>
-                    <i className='bi bi-repeat'></i>
-                </Button>
-                <Button variant='light'>
-                    <i className='bi bi-heart'></i>
-                </Button>
-                <Button variant='light'>
-                    <i className='bi bi-graph-up'></i>
-                </Button>
-                <Button variant='light'>
-                    <i className='bi bi-upload'></i>
-                </Button>
-            </div>
-            </Col>
-        </Row>
-    )
+  useEffect(() => {
+    console.log(postId)
+    fetch(`https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev/likes/post/${postId}`)
+    .then((response) => response.json())
+    .then((data) => setLikes(data.length))
+    .catch((error) => console.error("Error:", error));
+  }, [postId]);
+
+  return (
+    <Row 
+      className="p-3" 
+      style={{ 
+        borderTop: "1px solid #D3D3D3", 
+        borderBottom: "1px solid #D3D3D3" 
+      }}
+    >
+      <Col sm={1}>
+        <Image src={pic} fluid roundedCircle />
+      </Col>
+
+      <Col>
+        <strong>Haris</strong>
+        <span> @haris.samingan · Apr 16</span>
+        <p>{content}</p>
+        <div className="d-flex justify-content-between">
+          <Button variant="light">
+            <i className="bi bi-chat"></i>
+          </Button>
+          <Button variant="light">
+            <i className="bi bi-repeat"></i>
+          </Button>
+          <Button variant="light">
+            <i className="bi bi-heart"> {likes}</i>
+          </Button>
+          <Button variant="light">
+            <i className="bi bi-graph-up"></i>
+          </Button>
+          <Button variant="light">
+            <i className="bi bi-upload"></i>
+          </Button>
+        </div>
+      </Col>
+    </Row>
+  )
 }
