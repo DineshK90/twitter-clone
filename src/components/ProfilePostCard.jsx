@@ -1,17 +1,50 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Image, Row } from "react-bootstrap";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function ProfilePostCard({ content, postId }) {
-  const [likes, setLikes] = useState(0);
+  const [likes, setLikes] = useState([]);
+  const token = localStorage.getItem('authToken')
+  const decode = jwtDecode(token)
+  const userId = decode.id
+
   const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
+  const BASE_URL = 'https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev'
 
   useEffect(() => {
-    console.log(postId)
-    fetch(`https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev/likes/post/${postId}`)
+     fetch(`${BASE_URL}/likes/post/${postId}`)
     .then((response) => response.json())
-    .then((data) => setLikes(data.length))
+    .then((data) => setLikes(data))
     .catch((error) => console.error("Error:", error));
   }, [postId]);
+
+  const isLiked = likes.some((like)=> like.user_id === userId)
+
+  const handleLike = () => (isLiked? removeFromLikes() : addToLikes())
+
+  const addToLikes = () => {
+    axios.post(`${BASE_URL}/likes`, {
+      user_id: userId,
+      post_id: postId,
+    })
+    .then((response)=>{
+      setLikes([...likes, {...response.data, likes_id: response.data.id}])
+    })
+    .catch((error)=>console.error("Error:", error))
+  }
+
+  const removeFromLikes = () => {
+    const like = likes.find((like)=>like.user_id === userId)
+    if(like){
+      axios
+      .put(`${BASE_URL}/likes/${userId}/${postId}`)
+      .then(() => {
+        setLikes(likes.filter((likeItem) => likeItem.user_id !== userId))
+      })
+      .catch((error)=> console.error("Error", error))
+    }
+  }
 
   return (
     <Row 
@@ -36,8 +69,15 @@ export default function ProfilePostCard({ content, postId }) {
           <Button variant="light">
             <i className="bi bi-repeat"></i>
           </Button>
-          <Button variant="light">
-            <i className="bi bi-heart"> {likes}</i>
+          <Button variant="light" onClick={handleLike}>
+            {isLiked ?(
+              <i className="bi bi-heart-fill text-danger"></i>) : (
+                <i className="bi bi-heart"></i>
+              )
+            }
+            {likes.length}
+
+
           </Button>
           <Button variant="light">
             <i className="bi bi-graph-up"></i>
