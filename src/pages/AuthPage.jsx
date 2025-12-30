@@ -1,8 +1,14 @@
+import {
+    createUserWithEmailAndPassword,
+    getAuth,
+    signInWithEmailAndPassword} from 'firebase/auth'
+
 import { Button, Col, Row, Image, Modal, Form} from 'react-bootstrap'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 import useLocalStorage from 'use-local-storage'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../components/AuthProvider'
 
 export default function AuthPage(){
     const loginImage = 'https://sig1.co/img-twitter-1'
@@ -16,18 +22,24 @@ export default function AuthPage(){
 
     const navigate = useNavigate()
 
+    const auth = getAuth()
+    const {currentUser} = useContext(AuthContext)
+
     useEffect(()=>{
-        if(authToken){
-            navigate('/profile')
+        if(currentUser) navigate('/profile');
         }
-    }, [authToken, navigate])
+    , [currentUser, navigate])
 
 
     const handleSignUp = async(e) =>{
         e.preventDefault()
         try{
-            const res = await axios.post(`${url}/signup`, {username, password})
-            console.log(res.data)
+            const res = await createUserWithEmailAndPassword(
+                auth,
+                username,
+                password
+            )
+            console.log(res.user)
         } catch(error){
             console.error(error)
         }
@@ -36,10 +48,7 @@ export default function AuthPage(){
       const handleLogin = async(e) =>{
         e.preventDefault()
         try{
-            const res = await axios.post(`${url}/login`, {username, password})
-            if(res.data && res.data.auth === true && res.data.token){
-                setAuthToken(res.data.token)
-                console.log('Login was successful, token saved')}
+            await signInWithEmailAndPassword(auth, username, password)
         } catch(error){
             console.error(error)
         }

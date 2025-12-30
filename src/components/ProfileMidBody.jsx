@@ -16,21 +16,21 @@ export default function ProfileMidBody() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const posts = useSelector((store) => store.posts.posts);
+  const posts = useSelector((state) => state.posts.posts);
   const searchResults = useSelector((store) => store.posts.searchResults);
-  const loading = useSelector((store) => store.posts.loading);
+  const loading = useSelector((state) => state.posts.loading);
   const error = useSelector((store) => store.posts.error);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      const userId = decodedToken.id;
-      dispatch(fetchPostsByUser(userId));
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("authToken");
+  //   if (token) {
+  //     const decodedToken = jwtDecode(token);
+  //     const userId = decodedToken.id;
+  //     dispatch(fetchPostsByUser(userId));
+  //   }
+  // }, [dispatch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
