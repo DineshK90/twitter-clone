@@ -1,5 +1,4 @@
-import { jwtDecode } from "jwt-decode";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Button, Col, Image, Nav, Row, Spinner } from "react-bootstrap";
 import ProfilePostCard from "./ProfilePostCard";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,6 +7,8 @@ import {
   searchPosts,
 } from "../features/posts/postsSlice";
 
+import { AuthContext } from "./AuthProvider";
+
 export default function ProfileMidBody() {
   const url =
     "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500";
@@ -15,22 +16,16 @@ export default function ProfileMidBody() {
     "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
   const [searchTerm, setSearchTerm] = useState("");
-
+  const dispatch = useDispatch()
   const posts = useSelector((state) => state.posts.posts);
   const searchResults = useSelector((store) => store.posts.searchResults);
   const loading = useSelector((state) => state.posts.loading);
   const error = useSelector((store) => store.posts.error);
+  const {currentUser} = useContext(AuthContext)
 
-  const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem("authToken");
-  //   if (token) {
-  //     const decodedToken = jwtDecode(token);
-  //     const userId = decodedToken.id;
-  //     dispatch(fetchPostsByUser(userId));
-  //   }
-  // }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchPostsByUser(currentUser.uid))
+  }, [dispatch, currentUser]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -121,12 +116,26 @@ export default function ProfileMidBody() {
 
       {error && <p className="text-danger px-3">{error}</p>}
 
+      {/* {posts.map((post) => (
+          <ProfilePostCard
+            key={post.id}
+            // content={post.content}
+            // postId={post.id}
+            post={post}
+          />
+        ))}
+    </Col>
+  );
+} */}
+
+
       {displayedPosts.length > 0 &&
         displayedPosts.map((post) => (
           <ProfilePostCard
             key={post.id}
-            content={post.content}
-            postId={post.id}
+            // content={post.content}
+            // postId={post.id}
+            post={post}
           />
         ))}
     </Col>
