@@ -1,17 +1,23 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
-import {collection, doc, getDoc, getDocs, setDoc, where, query} from 'firebase/firestore'
-import { db } from "../../firebase";
+import {collection, doc, getDoc, getDocs, setDoc, where, query, updateDoc} from 'firebase/firestore'
+import { db, storage } from "../../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 // const BASE_URL = 'https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev'
 
 export const savePost = createAsyncThunk('posts/savePost', 
-  async ({userId, postContent}) =>{
+  async ({userId, postContent, file}) =>{
     try{
+        let imageUrl = "";
+        console.log(file)
+        if(file !== null){
+        const imageRef = ref(storage, `posts/${file.name}`)
+        const response = await uploadBytes(imageRef, file)
+        imageUrl = await getDownloadURL(response.ref)
+        }
         const postsRef = collection(db, `users/${userId}/posts`)
         const newPostRef = doc(postsRef)
-        await setDoc(newPostRef, {content:postContent, likes:[]})
+        await setDoc(newPostRef, {content:postContent, likes:[], imageUrl})
 
         const newPost = await getDoc(newPostRef)
         const post = {
@@ -19,6 +25,40 @@ export const savePost = createAsyncThunk('posts/savePost',
           ...newPost.data()
         }
         return post;
+    } catch(error){
+      console.error(error)
+      throw error
+    }
+  }
+)
+
+export const updatePost = createAsyncThunk('posts/updatePost', 
+  async ({userId, postId, newPostContent, newFile}) =>{
+    try{
+        let newImageUrl = "";
+        if(newFile){
+        const imageRef = ref(storage, `posts/${newFile.name}`)
+        const response = await uploadBytes(imageRef, newFile)
+        newImageUrl = await getDownloadURL(response.ref)
+        }
+        const postRef = doc(db, `users/${userId}/posts/${postId}`)
+        const postSnap = await getDoc(postRef)
+        
+        if(postSnap.exists()){
+          const postData = postSnap.data()
+
+          const updatedData = {
+            ...postData,
+            content: newPostContent || postData.content,
+            imageUrl:newImageUrl || postData.imageUrl,
+          }
+
+          await updateDoc(postRef, updatedData)
+          const updatedPost = {id:postId, ...updatedData}
+          return updatedPost
+        } else {
+          throw new Error("Post does not exist")
+        }       
     } catch(error){
       console.error(error)
       throw error
@@ -144,6 +184,15 @@ const postsSlice = createSlice({
 
         if (postIndex !== -1) {
           state.posts[postIndex].likes.push(userId);
+        }
+      })
+      .addCase(updatePost.fulfilled, (state,action)=>{
+        const updatedPost = action.payload
+        const postIndex = state.posts.findIndex(
+          (post)=>post.id === updatedPost.id
+        )
+        if(postIndex !== -1){
+          state.posts[postIndex] = updatedPost
         }
       })
 
