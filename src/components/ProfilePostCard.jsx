@@ -15,7 +15,7 @@ export default function ProfilePostCard({ post }) {
   const isLiked = likes.includes(userId)
 
   const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
-  const BASE_URL = 'https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev'
+  const BASE_URL = import.meta.env.VITE_API_URL
 
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const handleShowUpdateModal = () => setShowUpdateModal(true)

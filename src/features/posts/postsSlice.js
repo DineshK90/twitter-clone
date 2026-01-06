@@ -3,7 +3,6 @@ import {collection, doc, getDoc, getDocs, setDoc, where, query, updateDoc} from 
 import { db, storage } from "../../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-// const BASE_URL = 'https://f53b4046-5164-4ce1-a0dd-d5bf3beb1799-00-1nvu78jv81s33.janeway.replit.dev'
 
 export const savePost = createAsyncThunk('posts/savePost', 
   async ({userId, postContent, file}) =>{
